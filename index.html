@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Efficiency Labs - Gem Execution Protocol</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            taupe: { 100: '#f5f4f2', 200: '#e0ddd8', 300: '#c2bcb6', 500: '#8c8277', 700: '#5c544d', 900: '#38332f' },
+            olive: { 100: '#f1f4ec', 200: '#dbe0d1', 500: '#7a8c53', 700: '#4e5a35', 900: '#2f3720' },
+            rose:  { 100: '#fdf7f7', 200: '#f7e6e6', 500: '#c58385', 700: '#945b5d', 900: '#5c3536' },
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <style>
+    /* Minimalist Scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e0ddd8; border-radius: 0px; }
+    ::-webkit-scrollbar-thumb:hover { background: #c2bcb6; }
+    
+    /* Ensure sharp geometric aesthetics */
+    * { border-radius: 0 !important; }
+  </style>
+</head>
+<body class="bg-taupe-100 text-taupe-900 font-sans antialiased h-full overflow-hidden select-none">
+  <div id="root" class="h-full"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const PRESETS = [
+      {
+        id: "loop_core_funnel",
+        title: "Loop 1: Core Funnel",
+        description: "Manages intake of experts via digital channels, culminating in AI Prompt Kit distribution.",
+        defaultContext: {
+          traffic_source: "LinkedIn Organic",
+          campaign: "Zero-Manual Doctrine",
+          lead_email: "expert@consulting.com",
+          transaction_value: "$0.00",
+          asset_requested: "AI Prompt Kit v2"
+        },
+        definition: {
+          loop_id: "loop_core_funnel",
+          initial_state: "TRIGGERED",
+          state_machine: {
+            "TRIGGERED": {
+              label: "Top of Funnel (Social)",
+              plain_desc: "Traffic routed to Payhip landing page from social algorithms.",
+              type: "input",
+              next_state: "LEAD_CAPTURE"
+            },
+            "LEAD_CAPTURE": {
+              label: "Lead Validated (Stripe)",
+              plain_desc: "User initiates free download. Capture email, generate receipt, push payload to Mailerlite.",
+              type: "action",
+              next_state: "ASSET_DELIVERY"
+            },
+            "ASSET_DELIVERY": {
+              label: "Asset Delivery (Mailerlite)",
+              plain_desc: "Webhook payload received. Automated workflow triggers 'Welcome' email with asset.",
+              type: "action",
+              next_state: "TELEMETRY"
+            },
+            "TELEMETRY": {
+              label: "Telemetry Update",
+              plain_desc: "API call pushes new subscriber count to Notion Data Vault.",
+              type: "terminal",
+              terminal: true
+            },
+            "FALLBACK_EVALUATION": {
+              label: "Execution Blockade Analyzer",
+              plain_desc: "Determines if task can be automated via new script.",
+              type: "reasoning",
+              next_state: "HUMAN_APPROVAL"
+            },
+            "HUMAN_APPROVAL": {
+              label: "Orchestrator Approval (HITL)",
+              plain_desc: "Request Primary Orchestrator approval to deploy new script.",
+              type: "verification",
+              verification_logic: { type: "human_in_the_loop" },
+              next_state: "SCRIPT_DEPLOYMENT"
+            },
+            "SCRIPT_DEPLOYMENT": {
+              label: "Deploy Auto-Resolution Script",
+              plain_desc: "Script deployed. Logging success.",
+              type: "terminal",
+              terminal: true
+            }
+          }
+        }
+      },
+      {
+        id: "loop_core_infra",
+        title: "Loop 2: Core Infrastructure",
+        description: "Governs centralized headquarters, ensuring IP and logs are maintained autonomously.",
+        defaultContext: {
+          system_time: "17:00 MST",
+          webhook_errors: "0",
+          mailerlite_bounce: "1.2%",
+          active_log: "Sales Tracker 33d4f39cd73780d2893dd260f00d3cbf.csv"
+        },
+        definition: {
+          loop_id: "loop_core_infra",
+          initial_state: "TRIGGERED",
+          state_machine: {
+            "TRIGGERED": {
+              label: "Daily Retrospective",
+              plain_desc: "System clock reaches 17:00. Scrapes webhook errors and ingest sales tracker CSV.",
+              type: "input",
+              next_state: "IP_ARCHIVAL"
+            },
+            "IP_ARCHIVAL": {
+              label: "IP Archival & Formatting",
+              plain_desc: "Orchestrator inputs raw strategy; Gem formats into technical syntax and tags.",
+              type: "reasoning",
+              next_state: "NOTION_SYNC",
+              error_state: "FALLBACK_EVALUATION"
+            },
+            "NOTION_SYNC": {
+              label: "Notion API Sync",
+              plain_desc: "Push formatted IP to Notion Database.",
+              type: "action",
+              next_state: "VAULT_AUDIT",
+              error_state: "FALLBACK_EVALUATION"
+            },
+            "VAULT_AUDIT": {
+              label: "Vault Audit Dashboard",
+              plain_desc: "Compiles data into strictly formatted JSON payload for dashboard rendering.",
+              type: "terminal",
+              terminal: true
+            },
+            "FALLBACK_EVALUATION": {
+              label: "Execution Blockade Analyzer",
+              plain_desc: "Route exceptions through the standard fallback logic tree.",
+              type: "verification",
+              verification_logic: { type: "human_in_the_loop" },
+              next_state: "VAULT_AUDIT"
+            }
+          }
+        }
+      },
+      {
+        id: "loop_expansion_merch",
+        title: "Loop 3: Expansion Viability",
+        description: "Isolates the testing of niche physical merchandise to prevent core dilution.",
+        defaultContext: {
+          theme_status: "Taupe/Olive/Rose palette applied",
+          asset_file: "consultant_mug_v2.png",
+          alpha_channel: "Transparent",
+          test_day: "30",
+          compute_overhead: "$12.50"
+        },
+        definition: {
+          loop_id: "loop_expansion_merch",
+          initial_state: "TRIGGERED",
+          state_machine: {
+            "TRIGGERED": {
+              label: "Storefront Staging",
+              plain_desc: "Initial setup complete. Liquid theme customized to geometric standard.",
+              type: "input",
+              next_state: "PRODUCT_SYNC"
+            },
+            "PRODUCT_SYNC": {
+              label: "Product Sync & Asset Check",
+              plain_desc: "API sync with POD partner. Automated quality check on PNG alpha channels.",
+              type: "action",
+              next_state: "VIABILITY_ASSESSMENT",
+              error_state: "INFRASTRUCTURE_BLOCKER"
+            },
+            "VIABILITY_ASSESSMENT": {
+              label: "Viability Assessment",
+              plain_desc: "Pulls Shopify analytics, cross-references with compute costs, outputs recommendation.",
+              type: "reasoning",
+              next_state: "SUCCESS"
+            },
+            "SUCCESS": {
+              label: "Test Concluded",
+              plain_desc: "Binary decision data delivered to Primary Orchestrator.",
+              type: "terminal",
+              terminal: true
+            },
+            "INFRASTRUCTURE_BLOCKER": {
+              label: "Infrastructure Blocker",
+              plain_desc: "Asset rejected due to checkerboards. Halting pipeline. Flagging to Orchestrator.",
+              type: "terminal",
+              terminal: true
+            }
+          }
+        }
+      }
+    ];
+
+    function App() {
+      const [selectedPreset, setSelectedPreset] = useState(PRESETS[0]);
+      const [parsedDefinition, setParsedDefinition] = useState(PRESETS[0].definition);
+      const [sandboxContext, setSandboxContext] = useState(PRESETS[0].defaultContext);
+      const [selectedNodeId, setSelectedNodeId] = useState("TRIGGERED");
+
+      const [currentState, setCurrentState] = useState("TRIGGERED");
+      const [simStatus, setSimStatus] = useState("IDLE");
+      const [autoPlay, setAutoPlay] = useState(false);
+      const [activityLogs, setActivityLogs] = useState([]);
+      const [agentMemory, setAgentMemory] = useState({});
+      
+      const auditContainerRef = useRef(null);
+
+      const handleSelectPreset = (preset) => {
+        setSelectedPreset(preset);
+        setParsedDefinition(preset.definition);
+        setSandboxContext(preset.defaultContext);
+        setSelectedNodeId(preset.definition.initial_state || "TRIGGERED");
+        resetSimulation(preset.definition, preset.defaultContext);
+      };
+
+      const resetSimulation = (def = parsedDefinition, context = sandboxContext) => {
+        const startState = def?.initial_state || "TRIGGERED";
+        setCurrentState(startState);
+        setSimStatus("IDLE");
+        setAutoPlay(false);
+        setAgentMemory({ ...context, active_step: startState, status: "Initialized" });
+        setActivityLogs([{
+          id: Math.random().toString(36).substr(2, 9),
+          time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}),
+          type: "INFO",
+          title: "System Initialized",
+          desc: `Loaded protocol: ${def.loop_id}`
+        }]);
+      };
+
+      const addLog = (type, title, desc) => {
+        setActivityLogs(prev => [...prev, {
+          id: Math.random().toString(36).substr(2, 9),
+          time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}),
+          type, title, desc
+        }]);
+      };
+
+      useEffect(() => {
+        if (auditContainerRef.current) {
+          auditContainerRef.current.scrollTop = auditContainerRef.current.scrollHeight;
+        }
+      }, [activityLogs]);
+
+      const executeNextStep = () => {
+        if (!parsedDefinition || !parsedDefinition.state_machine) return;
+
+        const node = parsedDefinition.state_machine[currentState];
+        if (!node) {
+          setSimStatus("HALTED");
+          setAutoPlay(false);
+          return;
+        }
+
+        if (node.terminal) {
+          setSimStatus("SUCCESS");
+          setAutoPlay(false);
+          addLog("SUCCESS", "Protocol Concluded", node.plain_desc);
+          return;
+        }
+
+        let updatedMemory = { ...agentMemory, active_step: node.label };
+
+        if (node.type === "input") {
+          addLog("STEP", `Ingest: ${node.label}`, node.plain_desc);
+        }
+
+        if (node.type === "reasoning") {
+          addLog("AI", `Analysis: ${node.label}`, "Evaluating logic parameters. Decision: PROCEED.");
+        }
+
+        if (node.type === "action") {
+          updatedMemory.api_hash = "REQ-" + Math.floor(Math.random() * 90000);
+          addLog("ACTION", `Execute: ${node.label}`, `API payload dispatched. Hash: ${updatedMemory.api_hash}`);
+        }
+
+        if (node.verification_logic?.type === "human_in_the_loop") {
+          if (agentMemory.manager_approval === undefined) {
+            setSimStatus("HITL_PENDING");
+            setAutoPlay(false);
+            addLog("HITL", "Orchestrator Blockade", "Execution requires manual review prior to deployment.");
+            setAgentMemory(updatedMemory);
+            return;
+          }
+        }
+
+        setAgentMemory(updatedMemory);
+        const nextTarget = node.next_state;
+
+        if (nextTarget) {
+          setCurrentState(nextTarget);
+          setSelectedNodeId(nextTarget);
+        } else {
+          setSimStatus("HALTED");
+          setAutoPlay(false);
+        }
+      };
+
+      const handleHITLDecision = (approved) => {
+        const node = parsedDefinition.state_machine[currentState];
+        if (approved) {
+          setAgentMemory(prev => ({ ...prev, manager_approval: "APPROVED" }));
+          addLog("SUCCESS", "Approval Registered", "Orchestrator approved execution. Resuming.");
+          setSimStatus("RUNNING");
+          setCurrentState(node.next_state);
+          setSelectedNodeId(node.next_state);
+        } else {
+          setAgentMemory(prev => ({ ...prev, manager_approval: "REJECTED" }));
+          addLog("ERROR", "Execution Denied", "Orchestrator halted execution. Engaging fallback.");
+          setSimStatus("RUNNING");
+          const fallback = node.error_state || "TRIGGERED";
+          setCurrentState(fallback);
+          setSelectedNodeId(fallback);
+        }
+      };
+
+      useEffect(() => {
+        let timer;
+        if (autoPlay && simStatus === "RUNNING") {
+          timer = setTimeout(() => {
+            executeNextStep();
+          }, 1200);
+        }
+        return () => clearTimeout(timer);
+      }, [autoPlay, simStatus, currentState, agentMemory]);
+
+      return (
+        <div className="flex flex-col h-screen bg-taupe-100 text-taupe-900 font-sans overflow-hidden">
+          
+          {/* Header - Brutalist Geometric */}
+          <header className="bg-white border-b border-taupe-300 px-6 py-4 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-4">
+              <div className="text-olive-900">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L2 22H22L12 2Z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="miter"/>
+                  <rect x="7" y="10" width="10" height="10" stroke="currentColor" strokeWidth="2.5"/>
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-sm font-bold tracking-tight uppercase text-taupe-900">Efficiency Labs</h1>
+                <p className="text-[10px] font-mono tracking-widest text-taupe-500 uppercase">Gem Execution Protocol</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => {
+                  if (simStatus === 'RUNNING') {
+                    setSimStatus('PAUSED');
+                    setAutoPlay(false);
+                  } else {
+                    setSimStatus('RUNNING');
+                    setAutoPlay(true);
+                    if (simStatus === "IDLE") executeNextStep();
+                  }
+                }}
+                className={`px-8 py-2 text-xs font-bold uppercase tracking-widest border transition-colors ${
+                  autoPlay ? 'bg-rose-900 text-white border-rose-900 hover:bg-rose-700' : 'bg-olive-900 text-white border-olive-900 hover:bg-olive-700'
+                }`}
+              >
+                {autoPlay ? 'Halt Protocol' : 'Execute Loop'}
+              </button>
+              <button 
+                onClick={() => resetSimulation()}
+                className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-taupe-500 border border-transparent hover:border-taupe-300 hover:text-taupe-900 transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+          </header>
+
+          {/* Preset Selector */}
+          <div className="bg-white border-b border-taupe-300 px-6 py-0 flex shrink-0">
+            {PRESETS.map(preset => (
+              <button
+                key={preset.id}
+                onClick={() => handleSelectPreset(preset)}
+                className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-taupe-300 last:border-r-0 transition-colors ${
+                  selectedPreset.id === preset.id
+                    ? 'bg-taupe-900 text-white'
+                    : 'bg-white text-taupe-500 hover:bg-taupe-100 hover:text-taupe-900'
+                }`}
+              >
+                {preset.title}
+              </button>
+            ))}
+          </div>
+
+          {/* Blockade Intercept */}
+          {simStatus === "HITL_PENDING" && (
+            <div className="bg-rose-100 border-b border-rose-300 px-6 py-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-4">
+                <span className="text-rose-900 font-bold text-lg">!</span>
+                <div>
+                  <h3 className="text-xs font-bold text-rose-900 uppercase tracking-widest">Orchestrator Blockade</h3>
+                  <p className="text-[10px] text-rose-700 font-mono mt-1">Manual directive required to proceed.</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => handleHITLDecision(true)} className="px-6 py-2 bg-olive-900 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-olive-700 transition-colors">Approve</button>
+                <button onClick={() => handleHITLDecision(false)} className="px-6 py-2 bg-rose-900 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-rose-700 transition-colors">Reject</button>
+              </div>
+            </div>
+          )}
+
+          {/* Main Workspace */}
+          <div className="flex-1 grid grid-cols-12 overflow-hidden bg-taupe-100">
+            
+            {/* Column 1: Protocol Map */}
+            <div className="col-span-4 border-r border-taupe-300 bg-white flex flex-col overflow-hidden">
+              <div className="p-4 border-b border-taupe-300 bg-taupe-200">
+                <h2 className="text-[10px] font-bold text-taupe-900 uppercase tracking-widest">Protocol Architecture</h2>
+              </div>
+              <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-taupe-100/50">
+                {parsedDefinition?.state_machine && Object.entries(parsedDefinition.state_machine).map(([key, node]) => {
+                  const isActive = currentState === key;
+                  return (
+                    <div 
+                      key={key}
+                      onClick={() => setSelectedNodeId(key)}
+                      className={`p-4 border transition-all cursor-pointer ${
+                        isActive ? 'bg-olive-100 border-olive-900' : 'bg-white border-taupe-300 hover:border-taupe-500'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span className={`font-bold text-[11px] uppercase tracking-widest ${isActive ? 'text-olive-900' : 'text-taupe-900'}`}>{node.label}</span>
+                        {isActive && <span className="w-2 h-2 bg-olive-500 animate-pulse"></span>}
+                      </div>
+                      <p className="text-[10px] text-taupe-700 font-mono leading-relaxed">{node.plain_desc}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Column 2: Data Sandbox */}
+            <div className="col-span-4 border-r border-taupe-300 bg-white flex flex-col overflow-hidden">
+              <div className="p-4 border-b border-taupe-300 bg-taupe-200">
+                <h2 className="text-[10px] font-bold text-taupe-900 uppercase tracking-widest">Active Memory Context</h2>
+              </div>
+              <div className="p-6 border-b border-taupe-300 space-y-4">
+                {Object.entries(agentMemory).map(([k, v]) => (
+                  <div key={k} className="flex flex-col">
+                    <label className="block text-[9px] font-bold text-taupe-500 uppercase tracking-widest mb-1">{k.replace(/_/g, ' ')}</label>
+                    <div className={`px-3 py-2 text-[10px] font-mono border ${k === 'active_log' && v.includes('.csv') ? 'bg-rose-100 border-rose-300 text-rose-900' : 'bg-taupe-100 border-taupe-300 text-taupe-900'}`}>
+                      {String(v)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Column 3: Execution Log */}
+            <div className="col-span-4 bg-white flex flex-col overflow-hidden">
+              <div className="p-4 border-b border-taupe-300 bg-taupe-200">
+                <h2 className="text-[10px] font-bold text-taupe-900 uppercase tracking-widest">System Telemetry Log</h2>
+              </div>
+              <div ref={auditContainerRef} className="flex-1 p-6 overflow-y-auto space-y-4 bg-taupe-100/30">
+                {activityLogs.map((log) => (
+                  <div key={log.id} className="border-l-2 border-taupe-900 pl-4 py-1">
+                    <div className="flex justify-between text-[9px] font-bold text-taupe-500 uppercase tracking-widest mb-1.5">
+                      <span className={log.type === 'ERROR' || log.type === 'HITL' ? 'text-rose-700' : log.type === 'SUCCESS' ? 'text-olive-700' : ''}>[{log.type}]</span>
+                      <span>{log.time}</span>
+                    </div>
+                    <strong className="block text-[11px] uppercase tracking-wide text-taupe-900 mb-1">{log.title}</strong>
+                    <p className="text-[10px] font-mono text-taupe-700 leading-relaxed">{log.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
